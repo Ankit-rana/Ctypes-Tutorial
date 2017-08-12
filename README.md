@@ -8,16 +8,17 @@
 - Mostly DLL's are kept at /usr/lib and /lib 
 - Now since .so have been created , I will use Python module ctypes to interact with our .so file
 - On Linux, it is required to specify the filename including the extension to load a library, so attribute access can not be used to load libraries. Either the LoadLibrary() method of the dll loaders should be used, or you should load the library by creating an instance of CDLL by calling the constructor:
-
+```python
+	>>> from ctypes import *
 	>>> cdll.LoadLibrary("libc.so.6")  
 	<CDLL 'libc.so.6', handle ... at ...>
 	>>> libc = CDLL("libc.so.6")       
 	>>> libc                           
 	<CDLL 'libc.so.6', handle ... at ...>
 	>>>
-
+```
 - call the DLL's function
-
+```python
 	>>> print libc.time(None)  
 	1150640792
 	>>> printf = libc.printf
@@ -37,3 +38,4 @@
 	>>> printf("An int %d, a double %f\n", 1234, c_double(3.14))
 	An int 1234, a double 3.140000
 	31
+```
