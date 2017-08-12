@@ -4,11 +4,21 @@
 > **Note**
 > - Shared libraries are libraries that are loaded by programs when they start.
 > - Naming follow convention of having lib as prefix and .so as postfix
-- Once you have coded Cpp project, run these on Linux:
-	- g++ -fPIC -shared myclass.cc -o myclass.so
-	- g++ class_user.cc -ldl -o class_user
+- Once you have coded C project, run these on Linux:
+	- Compile lib code into a PIC (Position Independent Code)
+	- $ gcc -c -Wall -Werror -fpic foo.c
+	- convert object file into shared library
+	- $ gcc -shared -o libfoo.so foo.o
+	- make it known to loader (rpath, LD_LIBRARY_PATH or standard path)
+	- cp /home/username/foo/libfoo.so /usr/lib
+	- chmod 0755 /usr/lib/libfoo.so
+	- ldconfig                    // updates cache
+	- $ ldconfig -p | grep foo    // check if link got created
+	- libfoo.so (libc6) => /usr/lib/libfoo.so
+	- How to link to a c program ?
+	- $ gcc -Wall -o test main.c -lfoo    // remember pthreads
 
-- Mostly DLL's are kept at /usr/lib and /lib 
+- Mostly DLL's are kept at /usr/lib and /usr/local/lib 
 - Now since .so have been created , I will use Python module ctypes to interact with our .so file
 - But first a little background on ctypes
 > **Note**
