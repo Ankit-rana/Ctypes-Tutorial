@@ -24,7 +24,14 @@
 > **Note**
 > - ctypes is the de facto library for interfacing with C/C++ from CPython, and it provides not only full access to the native C interface of most major operating systems (e.g., kernel32 on Windows, or libc on *nix), but also provides support for loading and interfacing with dynamic libraries, such as DLLs or shared objects at runtime
 > - It does bring along with it a whole host of types for interacting with system APIs, and allows you to rather easily define your own complex types, such as structs and unions, and allows you to modify things such as padding and alignment, if needed.
-> - It can be a bit crufty to use, but in conjunction with the struct module, you are essentially provided full control over how your data types get translated into something usable by a pure C(++) method.
+
+- On Linux, it is required to specify the filename including the extension to load a library, so attribute access can not be used to load libraries. Either the LoadLibrary() method of the dll loaders should be used, or you should load the library by creating an instance of CDLL by calling the constructor:
+```python
+   >>> mylib = CDLL("libfoo.so")
+   >>> mylib
+   <CDLL 'libfoo.so', handle 23cd390 at 7fb973b261d0>
+```
+- How to access struct of DLL?
 MyStruct.h
 ```c
 struct my_struct {
@@ -34,22 +41,24 @@ struct my_struct {
 ```
 MyStruct.py
 ```python
-import ctypes
-class my_struct(ctypes.Structure):
-    _fields_ = [("a", c_int),
-                ("b", c_int)]
+	import ctypes
+	class my_struct(ctypes.Structure):
+    	    _fields_ = [("a", c_int),("b", c_int)]
+	>>> rc = my_struct(10,20)
+	>>> print rc.a, rc.b
+	10 20
 ```
-- On Linux, it is required to specify the filename including the extension to load a library, so attribute access can not be used to load libraries. Either the LoadLibrary() method of the dll loaders should be used, or you should load the library by creating an instance of CDLL by calling the constructor:
+- How to access functions in DLL ?
 ```python
-	>>> from ctypes import *
-	>>> cdll.LoadLibrary("libc.so.6")  
-	<CDLL 'libc.so.6', handle ... at ...>
-	>>> libc = CDLL("libc.so.6")       
-	>>> libc                           
-	<CDLL 'libc.so.6', handle ... at ...>
-	>>>
+   >>> mylib = CDLL("libfoo.so")       
+   >>> mylib
+   <CDLL 'libfoo.so', handle 23cd390 at 7fb973b261d0>
+   >>> print mylib.foo()
+   Hello, I'm a shared library
+   28
+
 ```
-- call the DLL's function
+- How to pass parameters to a function ?
 ```python
 	>>> print libc.time(None)  
 	1150640792
@@ -70,4 +79,21 @@ class my_struct(ctypes.Structure):
 	>>> printf("An int %d, a double %f\n", 1234, c_double(3.14))
 	An int 1234, a double 3.140000
 	31
+```
+| ctype    | C type                   | Python type                |
+|----------|--------------------------|----------------------------|
+| c_char   | char                     | 1-character                |
+| c_wchar  | wchar_t                  | 1-character unicode string |
+| c_int    | int                      | int/long                   |
+| c_uint   | unsigned int             | int/long                   |
+| c_float  | float                    | float                      |
+| c_double | double                   | float                      |
+| c_char_p | char * (NULL Terminated) | string or none             |
+- How to pass pointer ?
+```python
+	>>> from ctypes import *
+	>>> i = c_int(42)
+	>>> pi = pointer(i)
+	>>> pi.contents
+	c_long(42)
 ```
